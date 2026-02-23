@@ -1,0 +1,21 @@
+{
+  "name": "moco-ts",
+  "version": "0.1.0",
+  "description": "TypeScript re-implementation of MOCO AI orchestration framework (learning project)",
+  "private": true,
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^1.42.0",
+    "dotenv": "^16.4.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
