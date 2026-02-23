@@ -1,28 +1,27 @@
-// エージェントの設定ファイル（Markdown + YAML frontmatter）を読み込むモジュール。
+// エージェントの設定ファイル（純粋YAML）を読み込むモジュール。
 // moco の AgentLoader と AgentConfig に対応する。
 //
 // エージェント定義の形式:
-//   profiles/<profile>/agents/<name>.md
+//   profiles/<profile>/agents/<name>.yaml
 //
-//   ---
 //   name: orchestrator
 //   description: 説明文
 //   tools:
 //     - read_file
 //     - write_file
-//   ---
-//   ここがシステムプロンプト（Markdownボディ）
+//   system_prompt: |
+//     システムプロンプト本文
 
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import matter from 'gray-matter';
+import { parse as parseYaml } from 'yaml';
 import { ConfigError } from '../common/errors';
 
 export interface AgentConfig {
   name: string;
   description: string;
   systemPrompt: string;
-  tools: string[]; // ツール名の配列（getAllTools で解決する）
+  tools: string[]; // ツール名の配列（getToolsByName で解決する）
 }
 
 export async function loadAgent(
@@ -38,25 +37,24 @@ export async function loadAgent(
     throw new ConfigError(`Agent file not found: ${filePath}`);
   }
 
-  const { data, content } = matter(raw);
+  // takt と同様に parseYaml() に直接渡す
+  const data = parseYaml(raw) as Record<string, unknown>;
 
   if (!data.name) {
     throw new ConfigError(
-      `Agent file '${agentFile}' is missing 'name' in frontmatter`
+      `Agent file '${agentFile}' is missing 'name' field`
     );
   }
 
   return {
     name: data.name as string,
     description: (data.description as string) ?? '',
-    systemPrompt: content.trim(),
+    systemPrompt: ((data.system_prompt as string) ?? '').trim(),
     tools: (data.tools as string[]) ?? [],
   };
 }
 
-// デフォルトプロファイルのオーケストレーターエージェントを読み込む。
-// CLI や単体テスト時のエントリポイントとして使う。
 export async function loadDefaultAgent(): Promise<AgentConfig> {
   const profileDir = path.resolve(process.cwd(), 'profiles', 'default');
-  return loadAgent(profileDir, 'orchestrator.md');
+  return loadAgent(profileDir, 'orchestrator.yaml');
 }

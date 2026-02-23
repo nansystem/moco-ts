@@ -64,7 +64,7 @@ export class AgentRuntime {
   constructor(
     config: AgentConfig,
     tools: ToolDefinition[],
-    model: string = 'gemini-2.0-flash'
+    model: string = 'gemini-2.5-flash-lite'
   ) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
